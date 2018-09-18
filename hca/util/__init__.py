@@ -206,6 +206,8 @@ class SwaggerClient(object):
         self.swagger_url = swagger_url or self.config[self.__class__.__name__].swagger_url
         self._session_kwargs = session_kwargs
         self._swagger_spec = None
+        self.audience = swagger_url[:-15]
+        self.audience.replace('dss.', '')
 
         if USING_PYTHON2:
             self.__doc__ = _md2rst(self.swagger_spec["info"]["description"])
@@ -346,12 +348,11 @@ class SwaggerClient(object):
         with open(service_account_credentials_filename) as fh:
             service_credentials = json.load(fh)
 
-        audience = "https://dev.data.humancellatlas.org/"
         iat = time.time()
         exp = iat + self.token_expiration
         payload = {'iss': service_credentials["client_email"],
                    'sub': service_credentials["client_email"],
-                   'aud': audience,
+                   'aud': self.audience,
                    'iat': iat,
                    'exp': exp,
                    'email': service_credentials["client_email"],
